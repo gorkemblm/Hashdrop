@@ -1,0 +1,5 @@
+.build/
+build/
+.swiftpm/
+docs/*.frames/
+.DS_Store

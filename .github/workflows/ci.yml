@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    # The macOS 26 SDK (Xcode 26) is needed for Liquid Glass; the app itself runs on macOS 14+.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build universal app (ad-hoc signed)
+        run: SIGN_IDENTITY=- ./scripts/build-app.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hashdrop.app
+          path: build/Hashdrop.app

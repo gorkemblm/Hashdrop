@@ -179,10 +179,8 @@ open build/Hashdrop.app
 | `Sources/Hashdrop/SettingsView.swift` | Settings window |
 | `Sources/Hashdrop/DemoRenderer.swift` | Renders the README GIFs |
 
-## Disclaimer
-
-Hashdrop is an independent project and is not affiliated with, endorsed by or sponsored by Discord Inc. "Discord" is a trademark of Discord Inc.
-
 ## License
 
-[MIT](LICENSE) © 2026 Gorkem Bilim
+[MIT](LICENSE)
+
+<sub>Not affiliated with Discord. Discord is a trademark of Discord Inc.</sub>

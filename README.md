@@ -56,6 +56,8 @@ Sharing something you found on X, YouTube or anywhere else to a group chat usual
 
 Requires macOS 14 Sonoma or later (Apple Silicon or Intel). On macOS 26 the panels use Liquid Glass.
 
+**Updating:** quit Hashdrop from the menu bar panel, download the new `Hashdrop.dmg` and drag it into Applications, replacing the old copy. Your channels and settings are kept. See what changed on the [Releases](https://github.com/gorkemblm/Hashdrop/releases) page.
+
 > Prefer to build it yourself? See [Building from source](#building-from-source).
 
 ## Add channels

@@ -5,6 +5,7 @@ import SwiftUI
 /// Non-activating means it can take keyboard focus without pulling the user's current app to the background.
 final class GlassPanel: NSPanel {
     private let interactive: Bool
+    private var hostingController: NSHostingController<AnyView>?
 
     override var canBecomeKey: Bool { interactive }
     override var canBecomeMain: Bool { interactive }
@@ -26,11 +27,23 @@ final class GlassPanel: NSPanel {
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         isReleasedWhenClosed = false
 
-        let hosting = NSHostingView(rootView: content())
-        hosting.wantsLayer = true
-        hosting.layer?.backgroundColor = .clear
-        contentView = hosting
-        setContentSize(hosting.fittingSize)
+        // The panel follows its content's size itself (see fitContent), keeping the top edge put.
+        // Left to AppKit, the window would grow from its bottom-left corner and the whole panel would jump.
+        // With automatic sizing off, the view's fittingSize is zero, so the controller does the measuring.
+        let relay = SizeRelay()
+        let controller = NSHostingController(rootView: AnyView(content().onGeometryChange(for: CGSize.self) { $0.size } action: { _ in
+            relay.onChange?()
+        }))
+        controller.sizingOptions = []
+        (controller.view as? NSHostingView<AnyView>)?.sizingOptions = []
+        controller.view.wantsLayer = true
+        controller.view.layer?.backgroundColor = .clear
+        hostingController = controller
+        contentView = controller.view
+        setContentSize(contentSize)
+        relay.onChange = { [weak self] in
+            DispatchQueue.main.async { self?.fitContent() }
+        }
     }
 
     /// Fades in while sliding `offset` points into `frame`.
@@ -66,9 +79,15 @@ final class GlassPanel: NSPanel {
 
     /// Resizes to the SwiftUI content's current size, keeping the top edge where it is.
     func fitContent() {
-        guard let size = contentView?.fittingSize, size != frame.size else { return }
-        setFrame(NSRect(x: frame.minX, y: frame.maxY - size.height, width: size.width, height: size.height), display: true, animate: true)
+        let size = contentSize
+        guard size.width > 0, size.height > 0, size != frame.size else { return }
+        setFrame(NSRect(x: frame.minX, y: frame.maxY - size.height, width: size.width, height: size.height), display: true)
         invalidateShadow()
+    }
+
+    /// Ideal size of the SwiftUI content.
+    private var contentSize: CGSize {
+        hostingController?.sizeThatFits(in: CGSize(width: 10_000, height: 10_000)) ?? .zero
     }
 
     // MARK: - Placement
@@ -98,4 +117,9 @@ final class GlassPanel: NSPanel {
         }
         return NSRect(x: x, y: visible.maxY - size.height - 8, width: size.width, height: size.height).integral
     }
+}
+
+/// Lets the SwiftUI content report size changes back to the panel that hosts it.
+private final class SizeRelay {
+    var onChange: (() -> Void)?
 }

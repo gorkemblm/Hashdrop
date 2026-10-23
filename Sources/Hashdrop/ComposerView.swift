@@ -263,9 +263,10 @@ struct ComposerView: View {
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .padding(.top, 2)
+                    // Always two lines tall, so switching between short and long links never shifts the panel.
                     Text(text)
                         .font(.system(size: 12))
-                        .lineLimit(3)
+                        .lineLimit(2, reservesSpace: true)
                         .truncationMode(.middle)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -273,11 +274,14 @@ struct ComposerView: View {
             } else {
                 Text("Clipboard is empty — only your comment will be sent.")
                     .font(.system(size: 12))
+                    .lineLimit(2, reservesSpace: true)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(10)
             }
         }
+        // An image clipboard keeps the image-sized box even while a recent link is previewed.
+        .frame(maxWidth: .infinity, minHeight: model.clip.image != nil ? 110 : nil, maxHeight: model.clip.image != nil ? 110 : nil, alignment: .topLeading)
         .background(.primary.opacity(0.06))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
@@ -483,7 +487,8 @@ struct ComposerView: View {
                 Text(error)
                     .font(.system(size: 11))
                     .foregroundStyle(.red)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(2)
+                    .help(error)
             } else if model.showHoldHint {
                 Text("Hold ⏎ to send")
                     .font(.system(size: 11, weight: .semibold))
